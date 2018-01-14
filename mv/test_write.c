@@ -16,7 +16,7 @@ int main(int argc, char *argv[]) {
 	memset(data,atoi(argv[2]),2048*400);
 	printf("%d\n",data[0]);
 	uint64_t n = write(fd, data, 2048 * 400);
-	printf("%d\n",n);
+	printf("%ld\n",n);
 	if(n!= 2048 * 400)
 	    return -1;
 	free(data);

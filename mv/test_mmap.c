@@ -16,7 +16,7 @@ int main(int argc, char *argv[]) {
                   fdr, 0);
 	while(1){
 	    uint64_t index = rand()%(2048 * 400);
-	    printf("num[%lld] = %d\n",index ,data[index]);
+	    printf("num[%ld] = %d\n",index ,data[index]);
 	    usleep(10000);
 	}
 	return 0;
