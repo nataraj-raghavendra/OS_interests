@@ -1,17 +1,19 @@
 # mv vs cp
 
-In EXT file system each file has a inode number. You will be able to get the inode number by 
-
-```
-ls -l
-```
 ## mv
 When we move a file the inode is removed from the existing directory and mapped to the new directory. The inode number of the file is not changed. Except in few cases which we will dicuss later
 
 ## cp 
 When we copy a file a new file is created and the contents will be copied to the file. So the existing file will have the same inode number the new file will have different inode number.
 
-Lets see how this works with programs as it will give a better understanding as it did for me.
+Lets see how this works with programs which will give a better understanding as it did for me.
+
+Before we go to the experiments one important point to note, in EXT file system each file has a inode number. You will be able to get the inode number by 
+
+```
+ls -l
+```
+
 
 ## Programs
 We have two programs **test_write.c** and **test_mmap.c**. 
