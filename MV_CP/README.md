@@ -147,7 +147,7 @@ $ dd if=/dev/zero of=small.fs bs=1024 count=10240
 $ mkfs.ext3 small.fs
 ```
 
-The dd command creates the space for the filesystem . The mkfs.ext creates create the exxt3 file system on the small.fs.
+The dd command creates the space for the filesystem . The mkfs.ext creates create the ext3 file system on the small.fs.
 Now lets mount the filesystem onto the subfolder sub. Then we move twos.txt file into that
 ```
 $ sudo mount small.fs sub/
