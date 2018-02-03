@@ -52,7 +52,7 @@ $ ps
 
 Ok now what happens if our parent exits before our child exits. Lets try that. 
 
-## Experiment 3
+### Experiment 3
 Lets run the program **proc_parent_exit.c**. This program makes the parent exit before the child completes the execution. 
 ```
 $ gcc proc_parent_exit.c -o proc_parent_exit.o
@@ -73,7 +73,22 @@ $ ps -e | grep 1811
 ```
 How did this process become a parent to the process we create. When the parent dies before the child process. The child get associated with upstart as parent. This is the process  that cleans up orphans process. This can vary based on different operating systems. This is related to life cycle of the process. I will create a seperate article for the process lifecycle. 
 
-### PGID
-  This is the process Group ID. It is the PID of the process group leader. We can have a group of process that are created to achieve a
-
+## PGID
+  This is the process Group ID. It is the PID of the process group leader. We can have a group of process that are created to achieve a purpose. Let's understand it with a experiment.
+  
+### Experiment 4
+Let's execute the program **proc_child1.c**. This is the same program as **proc_child.c** excepts it prints the PGID using the function **getpgrp()** or **getpgid(0)**. The zero here will fetch the PGID of the executing process. 
+```
+$ gcc proc_child1.c -o proc_child1.o
+$ ./proc_child1.o 
+Parent:
+	PID = 30146
+	PPID = 28165
+	PGID=30146
+Child:
+	PID = 30147
+	PPID = 30146
+	PGID=30146
+```
+The PGID is he same as the PPID of thec child which is the sme as PID as the Parent. We can also create
 
