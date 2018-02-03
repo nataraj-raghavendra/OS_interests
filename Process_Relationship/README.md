@@ -90,5 +90,50 @@ Child:
 	PPID = 30146
 	PGID=30146
 ```
-The PGID is he same as the PPID of thec child which is the sme as PID as the Parent. We can also create
+The PGID is he same as the PPID of the child which is the same as PID as the Parent. We can move process between groups or create a new process group using the **setpgid()** function. In the next experiment lets play with this function. 
 
+### Experiment 5
+Let's run the program **proc_pgid.c**. This program has the parent process which created two child process. The child should have its PGID same as PID of the parent(as seen in Experiment 4). What we do in the program is we create a new group for child1. Since it is the only child its PID is the PGID. Now we try to move child2 from parent group to the newly created child1 group.
+
+```
+$ gcc proc_pgig.c -o proc_pgig.o
+$ ./proc_pgig.o 
+Parent:
+	PID = 30543
+	PPID = 28165
+	PGID = 30543
+Creating a new group for child1
+Child1:
+	PID = 30544
+	PPID = 30543
+	PGID = 30544
+Adding child2 to newly created group
+Child2:
+	PID = 30545
+	PPID = 30543
+	PGID = 30543
+```
+In the program we call fork() which creates new child1 process. Then the child1 process calls **setpgid(getpid(),0)**. which should create the a new group since the second paramenter which is the group ID is zero. Then we call fork() again to create child2. After child2 is created the child2 calls **setpgid(getpid(),pid_child1)** which should moves child2 to child1 group.  
+
+In the output above the Child1 PGID is the same as Child1 PID. Also the Child2 PGID is not the Child1 PID as expected. It is the PID of the Parent. This shows **"A process cannot associate itself with any group it wants to"**. Now lets modify this expriment a little. Instead of the child moving into different groups. Lets have the parent move the childs to different groups.
+
+### Experiment 6
+Lets run **proc_pgid1.c** which does the same as **proc_pgid.c** except that the group changing is done by parent. 
+```
+$ ./proc_pgig1.o 
+Parent:
+	PID = 31008
+	PPID = 28165
+	PGID = 31008
+Creating a new group for child1
+Child1:
+	PID = 31009
+	PPID = 31008
+	PGID = 31009
+Adding child2 to newly created group
+Child2:
+	PID = 31010
+	PPID = 31008
+	PGID = 31009
+```
+Now the child2 PGID is the same as child1 PID. This shows **A parent can chnge its childrens group"**.
