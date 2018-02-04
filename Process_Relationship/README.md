@@ -177,7 +177,7 @@ $ ps -o pid,ppid,pgid,sid,comm
 ```
 Looking as the output above. We have three processes of **proc_sid**(one parent and two child). Along with that I also have emacs which i have used for coding. Then we have the terminal process. We have 6 processs with unique PIDs. We have 4 PGIDs. All the process we created is the same group with ID 31945 which is the PID of our parent process. The emacs has a seperate PGID(28450) which is the same as the PID(28450) of emacs, since it is the only process in the group. Similarly for ps(31951) and bash(28165). Looking at PPID(31945) of the child processes we created has the PPID as out parent PID(31945). All the other process have bash PID(28165) as PPID. Now lets look at the SID. All processes have the SID as 28165. This is the same as PGID and PID of bash. 
 
-** All session ID are a process group ID but eh vice versa is not the same**
+**All session ID are a process group ID but the vice versa is not the same**
 
 So session is a group of process groups of which one of the PGID is the session ID. 
 
