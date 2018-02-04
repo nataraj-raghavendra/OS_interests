@@ -3,10 +3,10 @@
 In this article we will see how the processes are related in linux operating system. This article assumes the reader has knowledge about process and how to creata a process programatically.
 
 Lets get started with different IDs related to process.
-##PID
+## PID
   Each process has a unique ID called the process ID. This number is unique for each process. **getpid()** function gets the PID of the current process. 
   
-##PPID
+## PPID
   It is the parent process ID. It is the ID of the process that created the current process. **getppid** function gets the parent PID of the current process. 
   
 Before we get to other IDs lets understand PID and PPID through few experiments. 
@@ -181,5 +181,33 @@ Looking as the output above. We have three processes of **proc_sid**(one parent 
 
 So session is a group of process groups of which one of the PGID is the session ID. 
 
-To terminate the process run **fg** and press enter thrice. 
+To terminate the process run **fg** and press enter thrice.
+
+Now lets try changing the session ID. 
+
+### Experiment 8
+We will change the session ID of Child1 and the parent. Let's run the program **proc_setsid.c**. This frogram is the same as **proc_sid.c**(Experiment 7). It additionally calls **setsid()** which creates a new session and also prints the return value of the setsid function.
+
+```
+./proc_setsid.o 
+Createing new session Child1. Return value = 32358
+Child1:
+	PID = 32358
+	PPID = 32357
+	PGID = 32358
+	SID = 32358
+Child2:
+	PID = 32359
+	PPID = 32357
+	PGID = 32357
+	SID = 28165
+Createing new session parent. Return value = -1
+Parent:
+	PID = 32357
+	PPID = 28165
+	PGID = 32357
+	SID = 28165
+```
+The Child1 new SID is the smae as PID and PGID of Child1. The session 32358(child1) has a single process whose PID is the same.
+If you notice the setsid fails in case of parent and return the new SID incase of child. **setsid() will return error if the process is already a process group leader.** So process group leaders cannot create new sessions. 
 
