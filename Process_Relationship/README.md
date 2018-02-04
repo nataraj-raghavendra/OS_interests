@@ -115,7 +115,7 @@ Child2:
 ```
 In the program we call fork() which creates new child1 process. Then the child1 process calls **setpgid(getpid(),0)**. which should create the a new group since the second paramenter which is the group ID is zero. Then we call fork() again to create child2. After child2 is created the child2 calls **setpgid(getpid(),pid_child1)** which should moves child2 to child1 group.  
 
-In the output above the Child1 PGID is the same as Child1 PID. Also the Child2 PGID is not the Child1 PID as expected. It is the PID of the Parent. This shows **"A process cannot associate itself with any group it wants to"**. Now lets modify this expriment a little. Instead of the child moving into different groups. Lets have the parent move the childs to different groups.
+In the output above the Child1 PGID is the same as Child1 PID. Also the Child2 PGID is not the Child1 PID as expected. It is the PID of the Parent. This shows **"A process cannot associate itself with any group it wants to"**. However the PPID of both the childs are the parent PID. Now lets modify this expriment a little. Instead of the child moving into different groups. Lets have the parent move the childs to different groups.
 
 ### Experiment 6
 Lets run **proc_pgid1.c** which does the same as **proc_pgid.c** except that the group changing is done by parent. 
@@ -136,4 +136,50 @@ Child2:
 	PPID = 31008
 	PGID = 31009
 ```
-Now the child2 PGID is the same as child1 PID. This shows **A parent can chnge its childrens group"**.
+Now the child2 PGID is the same as child1 PID. This shows **A parent can change its childrens group"**.
+
+## SID
+This is the session ID. Like the other IDs, session ID is not a real ID. Its is just the ID of the process whose the session leader. A session is a group of process groups. Lets start with the experiment to understand this. 
+
+### Experiment 7
+Lets run the **proc_sid.c** program . This program just creates two children and each process prints the PID, PPID, PGID and SID. 
+This program will block since I want to demonstrate few things. So we need to execute it as a background process. 
+```
+$ gcc proc_sid.c -o proc_sid.o
+$ ./proc_sid.o & 
+Child1:
+	PID = 31870
+	PPID = 31869
+	PGID = 31869
+	SID = 28165
+Child2:
+	PID = 31871
+	PPID = 31869
+	PGID = 31869
+	SID = 28165
+Parent:
+	PID = 31869
+	PPID = 28165
+	PGID = 31869
+	SID = 28165
+```
+
+Now lets us the ps command to analize the processes and their relation ship.
+```
+$ ps -o pid,ppid,pgid,sid,comm
+  PID  PPID  PGID   SID COMMAND
+28165  2942 28165 28165 bash
+28450 28165 28450 28165 emacs
+31945 28165 31945 28165 proc_sid.o
+31946 31945 31945 28165 proc_sid.o
+31947 31945 31945 28165 proc_sid.o
+31951 28165 31951 28165 ps
+```
+Looking as the output above. We have three processes of **proc_sid**(one parent and two child). Along with that I also have emacs which i have used for coding. Then we have the terminal process. We have 6 processs with unique PIDs. We have 4 PGIDs. All the process we created is the same group with ID 31945 which is the PID of our parent process. The emacs has a seperate PGID(28450) which is the same as the PID(28450) of emacs, since it is the only process in the group. Similarly for ps(31951) and bash(28165). Looking at PPID(31945) of the child processes we created has the PPID as out parent PID(31945). All the other process have bash PID(28165) as PPID. Now lets look at the SID. All processes have the SID as 28165. This is the same as PGID and PID of bash. 
+
+** All session ID are a process group ID but eh vice versa is not the same**
+
+So session is a group of process groups of which one of the PGID is the session ID. 
+
+To terminate the process run **fg** and press enter thrice. 
+
