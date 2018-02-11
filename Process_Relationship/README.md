@@ -266,7 +266,7 @@ Received Signal to child process 2
 The above output shows the foreground process group(7618) which has two process(7818 & 7819). Each of the process in this group(parent and child) registers for a seperate signal functions. So when we send SIGINT by pressing **ctrl+c** the signal is sent to all processes in the foreground process group. So both process in the program(parent and child) receive the signal and we see both the print statements outputs in the program. Now lets move the child process to a seperate group.
 
 ### Experiment 12
-This program is the same as previous(Experiment 11) except we call the setpgid function in child process. As discussed earlier the function assigns the process to a process group. 
+Lets execute **proc_tcgetpgrp_setsid.c** program. This program is the same as previous(Experiment 11) except we call the setpgid function in child process. As discussed earlier the function assigns the process to a process group. 
 ```
 $ gcc proc_tcgetpgrp_setsid.c -o proc_tcgetpgrp_setsid.o 
 $ ./proc_tcgetpgrp_setsid.o 
