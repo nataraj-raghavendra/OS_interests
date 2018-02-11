@@ -211,3 +211,102 @@ Parent:
 The Child1 new SID is the smae as PID and PGID of Child1. The session 32358(child1) has a single process whose PID is the same.
 If you notice the setsid fails in case of parent and return the new SID incase of child. **setsid() will return error if the process is already a process group leader.** So process group leaders cannot create new sessions. 
 
+##Controlling Terminal
+Each session has a single controlling terminal. The process groups in a session can be divided to foreground and background  process groups. Each session has one foreground process group and many background session groups. Any termainal signals lize SIGINT and SIGSTOP are delivered to the foreground processs group. Lets understand this  concept using experiments. 
+
+### Experiment 9
+Lets execute the program **proc_tcgetpgrp.c**. This program prints the PID,SID,PGRP,TC_PGRP(the controlling terminal process).
+The function **tcgetpgrp(int fd)** returns the process group ID of the foreground process group associated with the terminal open in fd. In the program we use STDIN_FILENO which is the stdin of the terminal. 
+
+```
+$ gcc proc_tcgetpgrp.c -o proc_tcgetpgrp.o
+$ ./proc_tcgetpgrp.o 
+PID=>7327
+SID=>4764
+PGRP=>7327
+TC_PGRP=>7327
+```
+Here there is only one process(7327) so that is a leader of the process group and also the controlling process group ID. So the main process is the controlling process group with only one process. Now lets try sending signal to the process to verify it is the forground process.
+
+### Experiment 10
+Lets execute **proc_tcgetgrp_signal.c** program. This program registers a signal function for SIGINT. So when the signal SIGINT(Signal Interrupt) the function registered(signal_fn) is called. The SIGINT in terminal can be sent by pressing **ctrl + c** in the terminal. I have included a sleep of 5 seconds for time to send the SIGINT signal. 
+```
+$ gcc proc_tcgetpgrp_signal.c -o proc_tcgetpgrp_signal.o
+ragha:Process_Relationship$ ./proc_tcgetpgrp_signal.o 
+PID=>7479
+SID=>4764
+PGRP=>7479
+TC_PGRP=>7479
+^C
+Received Signal to main process 2
+```
+The signal is sent to the controlling process group(foreground process group) and the registered signal function is called.
+Now lets one more process to the foreground process group and registering another function to SIGINT signal. 
+
+### Experiment 11
+Lets execute the program **proc_tcgetpgrp_siggrp.c**. This program creates two process and each process registers to different signal function.  
+
+```
+$ gcc proc_tcgetpgrp_siggrp.c -o proc_tcgetpgrp_siggrp.o
+$ ./proc_tcgetpgrp_siggrp.o 
+Parent:PID=>7618
+SID=>4764
+PGRP=>7618
+TC_PGRP=>7618
+
+Child:PID=>7619
+SID=>4764
+PGRP=>7618
+TC_PGRP=>7618
+^C
+Received Signal to main process 2
+Received Signal to child process 2
+```
+
+The above output shows the foreground process group(7618) which has two process(7818 & 7819). Each of the process in this group(parent and child) registers for a seperate signal functions. So when we send SIGINT by pressing **ctrl+c** the signal is sent to all processes in the foreground process group. So both process in the program(parent and child) receive the signal and we see both the print statements outputs in the program. Now lets move the child process to a seperate group.
+
+### Experiment 12
+This program is the same as previous(Experiment 11) except we call the setpgid function in child process. As discussed earlier the function assigns the process to a process group. 
+```
+$ gcc proc_tcgetpgrp_setsid.c -o proc_tcgetpgrp_setsid.o 
+$ ./proc_tcgetpgrp_setsid.o 
+Parent:PID=>8002
+SID=>4764
+PGRP=>8002
+TC_PGRP=>8002
+
+Child:PID=>8003
+SID=>4764
+PGRP=>8003
+TC_PGRP=>8002
+
+^CReceived Signal to main process 2
+```
+The output above shows that only the main process receives the signal SIGINT and the child process does not receive the signal. The reason is when we create a new group the group goes as a background process group becuase a session can have only one foreground process group. Now lets make the child take control of the terminal. 
+
+### Experiment 13
+Lets execute the **proc_tcsetpgrp.c**. This is the same as the previous experiment except we make the child process the foreground process group. We use the **tcsetpgrp** function to set the foreground process group.  
+```
+$ gcc proc_tcsetpgrp.c -o proc_tcsetpgrp.o 
+$ ./proc_tcsetpgrp.o 
+Parent:PID=>8166
+SID=>4764
+PGRP=>8166
+TC_PGRP=>8166
+
+Parent:PID=>8166
+SID=>4764
+PGRP=>8166
+TC_PGRP=>8167
+
+Child:PID=>8167
+SID=>4764
+PGRP=>8167
+TC_PGRP=>8167
+
+^C
+Received Signal to child process 2
+```
+The output above shows that the parent initially is the foreground process group(8166). After calling the **tcsetpgrp** the child is the foreground process group(8167). So the  second print for parent shows that TC_PGRP changed to 8167. When we send the SIGINT signal the parent no longer receives the signal. The child receives the signal because the process becomes the foreground process group and the parent becomes the background process group. So the singal_fn_child is called.
+
+I hope this article helped in understanding the relationships between processes, session and terminal. 
